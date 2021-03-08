@@ -128,24 +128,49 @@ const buildString = (player) => {
   return res;
 };
 
+const questionClass = () => {
+  return new Promise((resolve, reject) => {
+    rl.question("enter class to target: ", (input) => resolve(input));
+  });
+};
+
 const main = async () => {
   try {
     // is shoving the whole main function inside a question callback a bad practice? i certainly hope not
-    rl.question(
-      "please enter links of all logs you would like to process: "
-    ).then(async (input) => {
-      let logIDs = [];
-      const idxs = indexes(input, "logs.tf/");
-      for (let i = 0; i < idxs.length; i++) {
-        logIDs.push(parseInt(input.slice(idxs[i] + 8, idxs[i] + 15)));
-      }
-      await buildRes(logIDs, "heavyweapons");
-      wepStats();
-      for (const player in res) {
-        console.log(buildString(res[player]));
-      }
-      return;
-    });
+    let logIDs = [];
+    const logInput = await rl.question(
+      "enter links of all logs you would like to process: "
+    );
+    const idxs = indexes(logInput, "logs.tf/");
+    for (let i = 0; i < idxs.length; i++) {
+      logIDs.push(parseInt(logInput.slice(idxs[i] + 8, idxs[i] + 15)));
+    }
+    const classInput = await rl.question("enter class to target: ");
+    const classes = [
+      "scout",
+      "soldier",
+      "pyro",
+      "demoman",
+      "heavyweapons",
+      "engineer",
+      "medic",
+      "sniper",
+      "spy",
+    ];
+    if (classInput === "heavy") classInput = "heavyweapons";
+    if (classInput === "demo") classInput = "demoman";
+    if (!classes.includes(classInput)) {
+      console.log("invalid class");
+      rl.interface.close()
+      return; // TODO: repeat question instead of terminating
+    }
+    rl.interface.close()
+    await buildRes(logIDs, classInput);
+    wepStats();
+    for (const player in res) {
+      console.log(buildString(res[player]));
+    }
+    return;
   } catch (err) {
     console.error(err);
   }
