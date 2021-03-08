@@ -117,21 +117,14 @@ const buildString = (player) => {
   let res = `${player.alias}:\ntotal kills: ${player.stats.kills}; total dmg: ${player.stats.dmg}\n`;
   for (const key in player.stats.weapon) {
     const wep = player.stats.weapon[key];
-    if (typeof wep == "object") {
+    if (typeof wep == "object" && (wep.kills > 0 || wep.dmg > 0)) {
       res += `${key}:\n    kills: ${wep.kills} - ${wep.killPercent}% of total\n    dmg: ${wep.dmg} - ${wep.dmgPercent}% of total\n`;
-    } else
+    } else if (typeof wep === "number" && wep > 0)
       res += `${key}:\n    kills: ${wep} - ${(wep / player.stats.kills).toFixed(
         2
       )}% of total\n`;
   }
-
   return res;
-};
-
-const questionClass = () => {
-  return new Promise((resolve, reject) => {
-    rl.question("enter class to target: ", (input) => resolve(input));
-  });
 };
 
 const main = async () => {
@@ -145,7 +138,7 @@ const main = async () => {
     for (let i = 0; i < idxs.length; i++) {
       logIDs.push(parseInt(logInput.slice(idxs[i] + 8, idxs[i] + 15)));
     }
-    const classInput = await rl.question("enter class to target: ");
+    let classInput = await rl.question("enter class to target: ");
     const classes = [
       "scout",
       "soldier",
@@ -161,10 +154,10 @@ const main = async () => {
     if (classInput === "demo") classInput = "demoman";
     if (!classes.includes(classInput)) {
       console.log("invalid class");
-      rl.interface.close()
+      rl.interface.close();
       return; // TODO: repeat question instead of terminating
     }
-    rl.interface.close()
+    rl.interface.close();
     await buildRes(logIDs, classInput);
     wepStats();
     for (const player in res) {
