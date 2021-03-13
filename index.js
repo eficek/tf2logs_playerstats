@@ -120,9 +120,10 @@ const buildString = (player) => {
     if (typeof wep == "object" && (wep.kills > 0 || wep.dmg > 0)) {
       res += `${key}:\n    kills: ${wep.kills} - ${wep.killPercent}% of total\n    dmg: ${wep.dmg} - ${wep.dmgPercent}% of total\n`;
     } else if (typeof wep === "number" && wep > 0)
-      res += `${key}:\n    kills: ${wep} - ${(wep / player.stats.kills).toFixed(
-        2
-      )}% of total\n`;
+      res += `${key}:\n    kills: ${wep} - ${(
+        (wep / player.stats.kills) *
+        100
+      ).toFixed(2)}% of total\n`;
   }
   return res;
 };
